@@ -1,4 +1,6 @@
 import DobotDllType as dType
+import atexit
+
 api = dType.load()
 
 # Set command timeout
@@ -17,6 +19,12 @@ if (dobotConnecResult == 0 ):
 else:
     print("can not connect to dobot. Please check the connection")
 
+def all_done():
+    dType.DisconnectDobot(api)
+    print("disconnect from the dobot")
+
+atexit.register(all_done)
+
 def on_message(*args):
     order = args[0]
     print('order from ble_button is: ' + order)
@@ -29,10 +37,10 @@ def get_drink(order):
         print("going to water")
         dType.SetPTPCmdEx(api, 0, -96,  -276,  67, 0, 1)
         dType.SetWAITCmdEx(api, 0.5, 1)
-        print("suction cup on")
+        print("suction cup on and get water")
         dType.SetEndEffectorSuctionCupEx(api, 1, 1)
         dType.SetWAITCmdEx(api, 0.5, 1)
-        print("moving near to water")
+        print("get back to arm")
         dType.SetPTPCmdEx(api, 2, -56,  -168,  90, 0, 1)
         dType.SetWAITCmdEx(api, 0.5, 1)
         print("give the drink to customer ")
@@ -48,11 +56,11 @@ def get_drink(order):
         print("going to tee")
         dType.SetPTPCmdEx(api, 0, -1,  -274,  67, 0, 1)
         dType.SetWAITCmdEx(api, 0.5, 1)
-        print("suction cup on")
+        print("suction cup on and get tee")
         dType.SetEndEffectorSuctionCupEx(api, 1, 1)
         dType.SetWAITCmdEx(api, 0.5, 1)
-        print("moving near")
-        dType.SetPTPCmdEx(api, 2, -13,  -208,  75, 0, 1)
+        print("get back to arm")
+        dType.SetPTPCmdEx(api, 2, -13,  -208,  90, 0, 1)
         dType.SetWAITCmdEx(api, 0.5, 1)
         print("give the drink to customer ")
         dType.SetPTPCmdEx(api, 1, 200,  0,  70, 0, 1)
