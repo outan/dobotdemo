@@ -133,67 +133,66 @@ RECORD_SECONDS =  4
 
 def on_message_speech_order(*args):
     print("get into on_message_speech_order")
-    mode = args[0]
-    if mode == "speech":
-        print 'マイクに4秒間話しかけてください >>>'
-        p = pyaudio.PyAudio()
-        input_device_index = 0  #マイク0番を設定
-        stream = p.open(  #マイクからデータ取得
-            format = FORMAT,
-            channels = CHANNELS,
-            rate = RATE,
-            input = True,
-            input_device_index = input_device_index,
-            frames_per_buffer = chunk
-            )
+    time.sleep(4)
+    print 'マイクに話しかけてください >>>'
+    p = pyaudio.PyAudio()
+    input_device_index = 0  #マイク0番を設定
+    stream = p.open(  #マイクからデータ取得
+        format = FORMAT,
+        channels = CHANNELS,
+        rate = RATE,
+        input = True,
+        input_device_index = input_device_index,
+        frames_per_buffer = chunk
+        )
 
-        all = []
-        for i in range(0, RATE / chunk * RECORD_SECONDS):
-                data = stream.read(chunk)
-                all.append(data)
+    all = []
+    for i in range(0, RATE / chunk * RECORD_SECONDS):
+            data = stream.read(chunk)
+            all.append(data)
 
-        stream.close()
-        data = ''.join(all)
-        out = wave.open('voice.wav','w')
-        out.setnchannels(1) #mono
-        out.setsampwidth(2) #16bit
-        out.setframerate(RATE)
-        out.writeframes(data)
-        out.close()
+    stream.close()
+    data = ''.join(all)
+    out = wave.open('voice.wav','w')
+    out.setnchannels(1) #mono
+    out.setsampwidth(2) #16bit
+    out.setframerate(RATE)
+    out.writeframes(data)
+    out.close()
 
-        p.terminate()
+    p.terminate()
 
-        print '<<< 録音完了'
+    print '<<< 録音完了'
 
-        path = 'voice.wav'
-        APIKEY = '484232446270726f464a6c3831737349657478796a4654717970364859574458656f78552e3974686b4631'
-        url = "https://api.apigw.smt.docomo.ne.jp/amiVoice/v1/recognize?APIKEY={}".format(APIKEY)
-        files = {"a": open(path, 'rb'), "v":"on"}
-        print("files is ", files)
-        r = requests.post(url, files=files)
-        print("order text is: ")
-        print r.json()['text']
-        text = r.json()['text']
+    path = 'voice.wav'
+    APIKEY = '484232446270726f464a6c3831737349657478796a4654717970364859574458656f78552e3974686b4631'
+    url = "https://api.apigw.smt.docomo.ne.jp/amiVoice/v1/recognize?APIKEY={}".format(APIKEY)
+    files = {"a": open(path, 'rb'), "v":"on"}
+    print("files is ", files)
+    r = requests.post(url, files=files)
+    print("order text is: ")
+    print r.json()['text']
+    text = r.json()['text']
 
-        water = "水".decode("utf-8")
-        tee = "茶".decode("utf-8")
-        coffee = "コーヒー".decode("utf-8")
+    water = "水".decode("utf-8")
+    tee = "茶".decode("utf-8")
+    coffee = "コーヒー".decode("utf-8")
 
-        if water in text:
-            socketIO_edison.emit('speech_order', 'water')
-            print("emit speech_order: " + 'water')
-            get_drink("water")
-        elif tee in text:
-            socketIO_edison.emit('speech_order', 'tee')
-            print("emit speech_order: " + 'tee')
-            get_drink("tee")
-        elif coffee in text:
-            socketIO_edison.emit('speech_order', 'coffee')
-            print("emit speech_order: " + 'coffee')
-            get_drink("coffee")
-        else:
-            socketIO_edison.emit('speech_order', 'notUnderstand')
-            print("emit speech_order: " + 'notUnderstand')
+    if water in text:
+        socketIO_edison.emit('speech_order', 'water')
+        print("emit speech_order: " + 'water')
+        get_drink("water")
+    elif tee in text:
+        socketIO_edison.emit('speech_order', 'tee')
+        print("emit speech_order: " + 'tee')
+        get_drink("tee")
+    elif coffee in text:
+        socketIO_edison.emit('speech_order', 'coffee')
+        print("emit speech_order: " + 'coffee')
+        get_drink("coffee")
+    else:
+        socketIO_edison.emit('speech_order', 'notUnderstand')
+        print("emit speech_order: " + 'notUnderstand')
 
         # ai = apiai.ApiAI(CLIENT_ACCESS_TOKEN)
         #
@@ -227,6 +226,6 @@ def on_message_speech_order(*args):
 
 
 socketIO_edison.on('speech_order_button',on_message_speech_order)
-socketIO_edison.on('speech_once_again',on_message_speech_order)
+socketIO_edison.on('speech_order',on_message_speech_order)
 
 socketIO_edison.wait()
